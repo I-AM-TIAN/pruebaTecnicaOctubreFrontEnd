@@ -112,37 +112,41 @@ export function DataTable<T extends { id: string }>({
 
       {pagination && pagination.totalPages > 1 && (
         <div className="bg-gray-50 px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-200">
-          <div className="text-sm text-gray-700">
-            Página <span className="font-medium">{pagination.page}</span> de{' '}
-            <span className="font-medium">{pagination.totalPages}</span>
+          <div className="text-sm text-gray-900 font-medium">
+            Página <span className="font-semibold">{pagination.page}</span> de{' '}
+            <span className="font-semibold">{pagination.totalPages}</span>
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={() => pagination.onPageChange(1)}
               disabled={pagination.page === 1}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg border border-primary-600 bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:border-gray-300"
+              title="Primera página"
             >
               <ChevronsLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => pagination.onPageChange(pagination.page - 1)}
               disabled={pagination.page === 1}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg border border-primary-600 bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:border-gray-300"
+              title="Página anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => pagination.onPageChange(pagination.page + 1)}
               disabled={pagination.page === pagination.totalPages}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg border border-primary-600 bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:border-gray-300"
+              title="Página siguiente"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => pagination.onPageChange(pagination.totalPages)}
               disabled={pagination.page === pagination.totalPages}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-lg border border-primary-600 bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:border-gray-300"
+              title="Última página"
             >
               <ChevronsRight className="w-4 h-4" />
             </button>

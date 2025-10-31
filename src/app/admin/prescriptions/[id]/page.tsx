@@ -172,7 +172,7 @@ export default function AdminPrescriptionDetailPage({ params }: PageProps) {
                   key={item.id || index}
                   className="p-4 bg-gray-50 rounded-lg border border-gray-200"
                 >
-                  <h3 className="font-semibold text-gray-900 mb-2">{item.medication}</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">{item.name}</h3>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     {item.dosage && (
@@ -190,10 +190,10 @@ export default function AdminPrescriptionDetailPage({ params }: PageProps) {
                     )}
                   </div>
                   
-                  {item.duration && (
+                  {item.instructions && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <span className="text-sm text-gray-600">Duración:</span>
-                      <p className="text-sm text-gray-900 mt-1">{item.duration}</p>
+                      <span className="text-sm text-gray-600">Instrucciones:</span>
+                      <p className="text-sm text-gray-900 mt-1">{item.instructions}</p>
                     </div>
                   )}
                 </div>

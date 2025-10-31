@@ -92,13 +92,6 @@ export default function DoctorPrescriptionsPage() {
       },
     },
     {
-      key: 'diagnosis',
-      label: 'Diagnóstico',
-      render: (item) => (
-        <span className="text-gray-700">{item.diagnosis}</span>
-      ),
-    },
-    {
       key: 'status',
       label: 'Estado',
       render: (item) => (

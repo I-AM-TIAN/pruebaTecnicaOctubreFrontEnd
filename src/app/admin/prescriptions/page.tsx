@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Eye } from 'lucide-react';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import apiClient from '@/lib/api-client';
-import type { Prescription, PaginatedResponse } from '@/types';
+import type { Prescription, PaginatedResponse, Doctor, Patient } from '@/types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -14,6 +14,8 @@ export default function AdminPrescriptionsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +30,27 @@ export default function AdminPrescriptionsPage() {
   });
 
   useEffect(() => {
+    loadDoctorsAndPatients();
+  }, []);
+
+  useEffect(() => {
     loadPrescriptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
+
+  const loadDoctorsAndPatients = async () => {
+    try {
+      const [doctorsData, patientsData] = await Promise.all([
+        apiClient<PaginatedResponse<Doctor>>('/doctors?limit=100'),
+        apiClient<PaginatedResponse<Patient>>('/patients?limit=100'),
+      ]);
+      
+      setDoctors(doctorsData.data);
+      setPatients(patientsData.data);
+    } catch (err: any) {
+      console.error('Error loading doctors/patients:', err);
+    }
+  };
 
   const loadPrescriptions = async () => {
     try {
@@ -47,7 +67,7 @@ export default function AdminPrescriptionsPage() {
       if (filters.patientId) params.append('patientId', filters.patientId);
       if (filters.from) params.append('from', filters.from);
       if (filters.to) params.append('to', filters.to);
-
+      
       const data = await apiClient<PaginatedResponse<Prescription>>(`/prescriptions/admin/prescriptions?${params}`);
       
       setPrescriptions(data.data);
@@ -65,7 +85,13 @@ export default function AdminPrescriptionsPage() {
   };
 
   const updateFilters = (newFilters: Partial<typeof filters>) => {
-    const updated = { ...filters, ...newFilters, page: 1 };
+    // Solo resetear a página 1 si se cambia algo diferente a la página
+    const shouldResetPage = !('page' in newFilters);
+    const updated = { 
+      ...filters, 
+      ...newFilters, 
+      ...(shouldResetPage && { page: 1 })
+    };
     setFilters(updated);
 
     const params = new URLSearchParams();
@@ -193,31 +219,54 @@ export default function AdminPrescriptionsPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white"
             >
               <option value="">Todos</option>
-              <option value="PENDING">Pendiente</option>
-              <option value="CONSUMED">Consumida</option>
+              <option value="pending">Pendiente</option>
+              <option value="consumed">Consumida</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ID del Doctor</label>
-            <input
-              type="text"
+            <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+            <select
               value={filters.doctorId}
               onChange={(e) => updateFilters({ doctorId: e.target.value })}
-              placeholder="UUID del doctor"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white"
-            />
+            >
+              <option value="">Todos los doctores</option>
+              {doctors.map((doctor) => {
+                const doctorObj = doctor as any;
+                const name = doctorObj.name || doctorObj.email || 'Sin nombre';
+                const specialty = doctorObj.doctor?.specialty || '';
+                // El userId correcto está en doctor.id (ID del registro Doctor, no del User)
+                const doctorId = doctorObj.doctor?.id || doctorObj.id;
+                return (
+                  <option key={doctorObj.id} value={doctorId}>
+                    {name}{specialty ? ` - ${specialty}` : ''}
+                  </option>
+                );
+              })}
+            </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ID del Paciente</label>
-            <input
-              type="text"
+            <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+            <select
               value={filters.patientId}
               onChange={(e) => updateFilters({ patientId: e.target.value })}
-              placeholder="UUID del paciente"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 bg-white"
-            />
+            >
+              <option value="">Todos los pacientes</option>
+              {patients.map((patient) => {
+                const patientObj = patient as any;
+                const name = patientObj.name || patientObj.email || 'Sin nombre';
+                // El patientId correcto está en patient.id (similar a doctor.id)
+                const patientId = patientObj.patient?.id || patientObj.id;
+                return (
+                  <option key={patientObj.id} value={patientId}>
+                    {name}
+                  </option>
+                );
+              })}
+            </select>
           </div>
 
           <div>
@@ -257,21 +306,21 @@ export default function AdminPrescriptionsPage() {
 
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-900 font-medium">
             Página {pagination.page} de {pagination.totalPages} ({pagination.total} total)
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => updateFilters({ page: filters.page - 1 })}
               disabled={filters.page === 1}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:border-gray-300"
             >
               Anterior
             </button>
             <button
               onClick={() => updateFilters({ page: filters.page + 1 })}
               disabled={filters.page === pagination.totalPages}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:border-gray-300"
             >
               Siguiente
             </button>

@@ -13,15 +13,13 @@ export default function NewPrescriptionPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     patientId: '',
-    diagnosis: '',
-    notes: '',
   });
   const [items, setItems] = useState<PrescriptionItem[]>([
-    { medication: '', dosage: '', quantity: 1, duration: '' },
+    { name: '', dosage: '', quantity: 1, instructions: '' },
   ]);
 
   const addItem = () => {
-    setItems([...items, { medication: '', dosage: '', quantity: 1, duration: '' }]);
+    setItems([...items, { name: '', dosage: '', quantity: 1, instructions: '' }]);
   };
 
   const removeItem = (index: number) => {
@@ -45,12 +43,7 @@ export default function NewPrescriptionPage() {
       return;
     }
 
-    if (!formData.diagnosis.trim()) {
-      toast.error('El diagnóstico es requerido');
-      return;
-    }
-
-    const validItems = items.filter((item) => item.medication.trim());
+    const validItems = items.filter((item) => item.name.trim());
     if (validItems.length === 0) {
       toast.error('Debe agregar al menos un medicamento');
       return;
@@ -61,13 +54,11 @@ export default function NewPrescriptionPage() {
     try {
       const dto: CreatePrescriptionDto = {
         patientId: formData.patientId.trim(),
-        diagnosis: formData.diagnosis.trim(),
-        notes: formData.notes || undefined,
         items: validItems.map(item => ({
-          medication: item.medication,
+          name: item.name,
           dosage: item.dosage,
           quantity: item.quantity,
-          duration: item.duration || undefined,
+          instructions: item.instructions || undefined,
         })),
       };
 
@@ -120,33 +111,6 @@ export default function NewPrescriptionPage() {
                 Ingresa el ID del paciente (patient ID).
               </p>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Diagnóstico <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.diagnosis}
-                onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
-                placeholder="ej: Gripe común, Hipertensión arterial..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Notas Generales
-              </label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
-                placeholder="Notas adicionales sobre la prescripción..."
-              />
-            </div>
           </div>
         </div>
 
@@ -175,8 +139,8 @@ export default function NewPrescriptionPage() {
                     <input
                       type="text"
                       required
-                      value={item.medication}
-                      onChange={(e) => updateItem(index, 'medication', e.target.value)}
+                      value={item.name}
+                      onChange={(e) => updateItem(index, 'name', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
                       placeholder="ej: Paracetamol 500mg"
                     />
@@ -213,14 +177,14 @@ export default function NewPrescriptionPage() {
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duración
+                      Instrucciones
                     </label>
                     <input
                       type="text"
-                      value={item.duration}
-                      onChange={(e) => updateItem(index, 'duration', e.target.value)}
+                      value={item.instructions}
+                      onChange={(e) => updateItem(index, 'instructions', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
-                      placeholder="ej: 5 días, 2 semanas"
+                      placeholder="ej: Tomar después de las comidas"
                     />
                   </div>
                 </div>

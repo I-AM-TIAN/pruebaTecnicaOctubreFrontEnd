@@ -74,10 +74,10 @@ export type PrescriptionStatus = 'pending' | 'consumed';
 
 export interface PrescriptionItem {
   id?: string;
-  medication: string;
+  name: string;
   dosage: string;
   quantity: number;
-  duration?: string;
+  instructions?: string;
 }
 
 export interface Prescription {
@@ -85,7 +85,7 @@ export interface Prescription {
   code: string;
   patientId: string;
   authorId: string;
-  diagnosis: string;
+  diagnosis?: string;
   notes?: string;
   status: PrescriptionStatus;
   createdAt: string;
@@ -106,13 +106,11 @@ export interface Prescription {
 
 export interface CreatePrescriptionDto {
   patientId: string;
-  diagnosis: string;
-  notes?: string;
   items: Array<{
-    medication: string;
+    name: string;
     dosage: string;
     quantity: number;
-    duration?: string;
+    instructions?: string;
   }>;
 }
 

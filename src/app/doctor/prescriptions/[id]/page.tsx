@@ -144,7 +144,7 @@ export default function DoctorPrescriptionDetailPage({ params }: PageProps) {
         <div className="space-y-4">
           {prescription.items.map((item, index) => (
             <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-2">{item.medication}</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{item.name}</h3>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 {item.dosage && (
@@ -161,10 +161,10 @@ export default function DoctorPrescriptionDetailPage({ params }: PageProps) {
                   </div>
                 )}
 
-                {item.duration && (
+                {item.instructions && (
                   <div className="col-span-2 md:col-span-3">
-                    <span className="text-gray-500">Duración:</span>
-                    <p className="text-gray-900 mt-1">{item.duration}</p>
+                    <span className="text-gray-500">Instrucciones:</span>
+                    <p className="text-gray-900 mt-1">{item.instructions}</p>
                   </div>
                 )}
               </div>
