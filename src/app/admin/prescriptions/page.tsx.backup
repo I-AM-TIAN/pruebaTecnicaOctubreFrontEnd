@@ -1,0 +1,546 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search, Filter, X, Eye, Download, RefreshCw } from 'lucide-react';
+import { DataTable } from '@/components/ui/DataTable';
+import apiClient from '@/lib/api-client';
+import type { Prescription, PaginatedResponse, AdminPrescriptionFilters, PrescriptionStatus } from '@/types';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+export default function AdminPrescriptionsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(true);
+  
+  // Lists for filters
+  const [doctors, setDoctors] = useState<Array<{ id: string; name: string; email: string }>>([]);
+  const [patients, setPatients] = useState<Array<{ id: string; name: string; email: string }>>([]);
+  
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  // Filters
+  const [filters, setFilters] = useState<AdminPrescriptionFilters>({
+    status: undefined,
+    doctorId: '',
+    patientId: '',
+    from: '',
+    to: '',
+    page: 1,
+    limit: 10,
+  });
+
+  useEffect(() => {
+    loadDoctorsAndPatients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo cargar una vez al montar
+
+  useEffect(() => {
+    loadPrescriptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, filters.status, filters.doctorId, filters.patientId, filters.from, filters.to]);
+
+  const loadDoctorsAndPatients = async () => {
+    try {
+      // Load all prescriptions to extract unique doctors and patients
+      const data = await apiClient<PaginatedResponse<Prescription>>(`/admin/prescriptions?limit=1000`);
+      
+      // Extract unique doctors
+      const uniqueDoctors = new Map<string, { id: string; name: string; email: string }>();
+      data.data.forEach(prescription => {
+        if (prescription.author?.user && prescription.authorId) {
+          const doctorId = prescription.authorId;
+          if (!uniqueDoctors.has(doctorId)) {
+            uniqueDoctors.set(doctorId, {
+              id: doctorId,
+              name: prescription.author.user.name || 'Sin nombre',
+              email: prescription.author.user.email || 'Sin email'
+            });
+          }
+        }
+      });
+      
+      // Extract unique patients
+      const uniquePatients = new Map<string, { id: string; name: string; email: string }>();
+      data.data.forEach(prescription => {
+        if (prescription.patient?.user && prescription.patientId) {
+          const patientId = prescription.patientId;
+          if (!uniquePatients.has(patientId)) {
+            uniquePatients.set(patientId, {
+              id: patientId,
+              name: prescription.patient.user.name || 'Sin nombre',
+              email: prescription.patient.user.email || 'Sin email'
+            });
+          }
+        }
+      });
+      
+      setDoctors(Array.from(uniqueDoctors.values()).sort((a, b) => a.name.localeCompare(b.name)));
+      setPatients(Array.from(uniquePatients.values()).sort((a, b) => a.name.localeCompare(b.name)));
+    } catch (err) {
+      console.error('Error loading doctors and patients:', err);
+    }
+  };
+
+  const loadPrescriptions = async () {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      
+      if (filters.status) params.append('status', filters.status);
+      if (filters.doctorId?.trim()) params.append('doctorId', filters.doctorId.trim());
+      if (filters.patientId?.trim()) params.append('patientId', filters.patientId.trim());
+      if (filters.from) params.append('from', filters.from);
+      if (filters.to) params.append('to', filters.to);
+
+      console.log('Loading prescriptions with params:', params.toString());
+
+      const data = await apiClient<PaginatedResponse<Prescription>>(`/admin/prescriptions?${params}`);
+      
+      console.log('✅ Prescriptions loaded:', data.data);
+      
+      setPrescriptions(data.data);
+      setTotal(data.meta.total);
+      setTotalPages(data.meta.pages);
+    } catch (err: any) {
+      console.error('Error loading prescriptions:', err);
+      setError(err.message || 'Error al cargar prescripciones');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFilterChange = (key: keyof AdminPrescriptionFilters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPage(1); // Reset to first page on filter change
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      status: undefined,
+      doctorId: '',
+      patientId: '',
+      from: '',
+      to: '',
+      page: 1,
+      limit: 10,
+    });
+    setPage(1);
+  };
+
+  const hasActiveFilters = Boolean(
+    filters.status || 
+    filters.doctorId?.trim() || 
+    filters.patientId?.trim() || 
+    filters.from || 
+    filters.to
+  );
+
+  const handleViewDetail = (id: string) => {
+    router.push(`/admin/prescriptions/${id}`);
+  };
+
+  const handleDownloadPDF = async (prescription: Prescription) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001';
+      
+      const response = await fetch(`${apiBaseUrl}/prescriptions/${prescription.id}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Error al descargar PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prescripcion-${prescription.code}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    }
+  };
+
+  const columns = [
+    {
+      key: 'code',
+      label: 'Código',
+      render: (item: Prescription) => (
+        <span className="font-mono text-sm font-semibold text-primary-600">
+          {item.code || 'N/A'}
+        </span>
+      ),
+    },
+    {
+      key: 'doctor',
+      label: 'Doctor',
+      render: (item: Prescription) => {
+        const doctorName = item.author?.user?.name;
+        const doctorEmail = item.author?.user?.email;
+        const hasDoctor = doctorName || doctorEmail;
+        
+        return (
+          <div className="min-w-[180px]">
+            {hasDoctor ? (
+              <>
+                <p className="text-sm font-medium text-gray-900">
+                  {doctorName || 'Sin nombre'}
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {doctorEmail || 'Sin email'}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-medium text-gray-400">Sin información</p>
+            )}
+            {item.authorId && (
+              <p className="text-xs text-gray-500 font-mono mt-1">
+                ID: {item.authorId.substring(0, 8)}...
+              </p>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: 'patient',
+      label: 'Paciente',
+      render: (item: Prescription) => {
+        const patientName = item.patient?.user?.name;
+        const patientEmail = item.patient?.user?.email;
+        const hasPatient = patientName || patientEmail;
+        
+        return (
+          <div className="min-w-[180px]">
+            {hasPatient ? (
+              <>
+                <p className="text-sm font-medium text-gray-900">
+                  {patientName || 'Sin nombre'}
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  {patientEmail || 'Sin email'}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-medium text-gray-400">Sin información</p>
+            )}
+            {item.patientId && (
+              <p className="text-xs text-gray-500 font-mono mt-1">
+                ID: {item.patientId.substring(0, 8)}...
+              </p>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: 'items',
+      label: 'Medicamentos',
+      render: (item: Prescription) => (
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">
+            {item.items?.length || 0}
+          </span>
+          <span className="text-sm text-gray-600">
+            {item.items?.length === 1 ? 'medicamento' : 'medicamentos'}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      render: (item: Prescription) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            item.status === 'PENDING'
+              ? 'bg-yellow-100 text-yellow-800'
+              : 'bg-green-100 text-green-800'
+          }`}
+        >
+          {item.status === 'PENDING' ? 'Pendiente' : 'Consumida'}
+        </span>
+      ),
+    },
+    {
+      key: 'createdAt',
+      label: 'Fecha Creación',
+      render: (item: Prescription) => (
+        <div>
+          <p className="text-sm text-gray-900">
+            {format(new Date(item.createdAt), 'dd/MM/yyyy', { locale: es })}
+          </p>
+          <p className="text-xs text-gray-500">
+            {format(new Date(item.createdAt), 'HH:mm', { locale: es })}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: 'consumedAt',
+      label: 'Fecha Consumo',
+      render: (item: Prescription) => (
+        item.consumedAt ? (
+          <div>
+            <p className="text-sm text-gray-900">
+              {format(new Date(item.consumedAt), 'dd/MM/yyyy', { locale: es })}
+            </p>
+            <p className="text-xs text-gray-500">
+              {format(new Date(item.consumedAt), 'HH:mm', { locale: es })}
+            </p>
+          </div>
+        ) : (
+          <span className="text-sm text-gray-400">-</span>
+        )
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (item: Prescription) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleViewDetail(item.id)}
+            className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+            title="Ver detalle"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDownloadPDF(item)}
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Descargar PDF"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  if (isLoading && prescriptions.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8">
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Todas las Prescripciones</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-2">
+          Gestiona y visualiza todas las prescripciones del sistema
+        </p>
+      </div>
+
+      {/* Filters Bar */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filtros
+          </h2>
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Limpiar
+              </button>
+            )}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+            >
+              {showFilters ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
+        </div>
+
+        {showFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estado
+              </label>
+              <select
+                value={filters.status || ''}
+                onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+              >
+                <option value="">Todos</option>
+                <option value="PENDING">Pendiente</option>
+                <option value="CONSUMED">Consumida</option>
+              </select>
+            </div>
+
+            {/* Doctor Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Doctor
+              </label>
+              <select
+                value={filters.doctorId || ''}
+                onChange={(e) => handleFilterChange('doctorId', e.target.value || undefined)}
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+              >
+                <option value="">Todos los doctores</option>
+                {doctors.map(doctor => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name} ({doctor.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Patient Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Paciente
+              </label>
+              <select
+                value={filters.patientId || ''}
+                onChange={(e) => handleFilterChange('patientId', e.target.value || undefined)}
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+              >
+                <option value="">Todos los pacientes</option>
+                {patients.map(patient => (
+                  <option key={patient.id} value={patient.id}>
+                    {patient.name} ({patient.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date From Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Desde
+              </label>
+              <input
+                type="date"
+                value={filters.from || ''}
+                onChange={(e) => handleFilterChange('from', e.target.value)}
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Date To Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Hasta
+              </label>
+              <input
+                type="date"
+                value={filters.to || ''}
+                onChange={(e) => handleFilterChange('to', e.target.value)}
+                className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Refresh Button */}
+            <div className="flex items-end">
+              <button
+                onClick={loadPrescriptions}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Actualizar
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Results Info */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Mostrando <span className="font-medium">{prescriptions.length}</span> de{' '}
+          <span className="font-medium">{total}</span> prescripciones
+        </p>
+        {hasActiveFilters && (
+          <span className="text-sm text-primary-600 font-medium">
+            Filtros activos
+          </span>
+        )}
+      </div>
+
+      {/* Table */}
+      {error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <p className="text-red-800 font-medium mb-2">Error al cargar prescripciones</p>
+          <p className="text-red-600 text-sm mb-4">{error}</p>
+          <button
+            onClick={loadPrescriptions}
+            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={prescriptions}
+          isLoading={isLoading}
+          emptyMessage="No se encontraron prescripciones"
+          onRetry={loadPrescriptions}
+        />
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1 || isLoading}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Anterior
+          </button>
+          
+          <span className="text-sm text-gray-700">
+            Página <span className="font-medium">{page}</span> de{' '}
+            <span className="font-medium">{totalPages}</span>
+          </span>
+          
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages || isLoading}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
