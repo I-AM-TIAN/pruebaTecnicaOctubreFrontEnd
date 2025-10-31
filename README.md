@@ -74,7 +74,7 @@ npm install
 Crea un archivo `.env.local` en la raíz del proyecto:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4001
 ```
 
 > **Nota**: Ajusta la URL según tu configuración del backend.
