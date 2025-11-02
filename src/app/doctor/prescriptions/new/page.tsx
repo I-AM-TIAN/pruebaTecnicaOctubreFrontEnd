@@ -1,22 +1,43 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
-import { prescriptionService } from '@/lib/api-services';
-import type { PrescriptionItem, CreatePrescriptionDto } from '@/types';
+import { prescriptionService, patientService } from '@/lib/api-services';
+import type { PrescriptionItem, CreatePrescriptionDto, Patient } from '@/types';
 
 export default function NewPrescriptionPage() {
   const router = useRouter();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loadingPatients, setLoadingPatients] = useState(true);
   const [formData, setFormData] = useState({
     patientId: '',
   });
   const [items, setItems] = useState<PrescriptionItem[]>([
     { name: '', dosage: '', quantity: 1, instructions: '' },
   ]);
+
+  useEffect(() => {
+    loadPatients();
+  }, []);
+
+  const loadPatients = async () => {
+    try {
+      setLoadingPatients(true);
+      const data = await patientService.getPatients({ limit: 100 });
+      console.log('Patients loaded:', data);
+      console.log('First patient sample:', data.data[0]);
+      setPatients(data.data);
+    } catch (error: any) {
+      console.error('Error loading patients:', error);
+      toast.error('Error al cargar lista de pacientes');
+    } finally {
+      setLoadingPatients(false);
+    }
+  };
 
   const addItem = () => {
     setItems([...items, { name: '', dosage: '', quantity: 1, instructions: '' }]);
@@ -62,12 +83,16 @@ export default function NewPrescriptionPage() {
         })),
       };
 
+      console.log('Creating prescription with DTO:', dto);
+      console.log('Selected patient from state:', patients.find(p => (p as any).id === formData.patientId));
+
       await prescriptionService.create(dto);
 
       toast.success('Prescripción creada exitosamente');
       router.push('/doctor/prescriptions');
     } catch (error: any) {
       console.error('Error creating prescription:', error);
+      console.error('Error details:', { message: error.message, status: error.status, data: error.data });
       
       // Manejo específico de errores comunes
       if (error.message?.includes('Patient not found') || error.message?.includes('not found')) {
@@ -97,18 +122,49 @@ export default function NewPrescriptionPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                ID del Paciente <span className="text-red-500">*</span>
+                Paciente <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                required
-                value={formData.patientId}
-                onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 font-mono"
-                placeholder="ej: cm2xzy6e40003u2k6xyz"
-              />
+              {loadingPatients ? (
+                <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  <span className="text-sm text-gray-500">Cargando pacientes...</span>
+                </div>
+              ) : (
+                <select
+                  required
+                  value={formData.patientId}
+                  onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 bg-white"
+                >
+                  <option value="">Selecciona un paciente</option>
+                  {patients.map((patient) => {
+                    // El backend puede devolver la estructura de diferentes formas
+                    // Intentar acceder a los datos de múltiples formas posibles
+                    const patientData = patient as any;
+                    
+                    // Buscar el nombre en diferentes ubicaciones
+                    const name = patientData.name || 
+                                patientData.user?.name || 
+                                patientData.user?.email?.split('@')[0] || 
+                                'Paciente';
+                    
+                    // Buscar el email
+                    const email = patientData.email || patientData.user?.email || '';
+                    
+                    // IMPORTANTE: El backend espera el ID interno del patient (patient.patient.id)
+                    // no el ID del registro principal (patient.id)
+                    const patientId = patientData.patient?.id || patientData.id;
+                    
+                    return (
+                      <option key={patientData.id} value={patientId}>
+                        {name} {email ? `- ${email}` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
               <p className="mt-1 text-sm text-gray-500">
-                Ingresa el ID del paciente (patient ID).
+                Selecciona el paciente para quien será la prescripción.
               </p>
             </div>
           </div>
