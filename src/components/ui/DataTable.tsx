@@ -60,7 +60,8 @@ export function DataTable<T extends { id: string }>({
     );
   }
 
-  if (data.length === 0) {
+  // Handle undefined or null data
+  if (!data || !Array.isArray(data) || data.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
         <p className="text-gray-600">{emptyMessage}</p>

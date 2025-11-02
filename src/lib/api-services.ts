@@ -12,6 +12,8 @@ import type {
   // Users
   User,
   UserFilters,
+  CreateUserDto,
+  UpdateUserDto,
   // Patients
   Patient,
   PatientFilters,
@@ -36,7 +38,7 @@ import type {
 
 export const authService = {
   /**
-   * POST /auth/login
+   * POST /api/auth/login
    * Login and get access tokens
    */
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
@@ -48,7 +50,7 @@ export const authService = {
   },
 
   /**
-   * POST /auth/refresh
+   * POST /api/auth/refresh
    * Refresh access token
    */
   refresh: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
@@ -60,7 +62,7 @@ export const authService = {
   },
 
   /**
-   * GET /auth/profile
+   * GET /api/auth/profile
    * Get authenticated user profile
    */
   getProfile: async (): Promise<AuthProfile> => {
@@ -68,7 +70,7 @@ export const authService = {
   },
 
   /**
-   * POST /auth/logout
+   * POST /api/auth/logout
    * Logout and invalidate current token
    */
   logout: async (): Promise<void> => {
@@ -84,7 +86,7 @@ export const authService = {
 
 export const adminService = {
   /**
-   * GET /users
+   * GET /api/admin/users
    * List system users with filters and pagination
    * Roles: admin
    */
@@ -92,14 +94,59 @@ export const adminService = {
     const params = new URLSearchParams();
     
     if (filters?.role) params.append('role', filters.role);
+    if (filters?.search) params.append('search', filters.search);
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
 
-    return apiClient<PaginatedResponse<User>>(`/users?${params.toString()}`);
+    return apiClient<PaginatedResponse<User>>(`/admin/users?${params.toString()}`);
   },
 
   /**
-   * GET /admin/metrics
+   * GET /api/admin/users/:id
+   * Get user by ID
+   * Roles: admin
+   */
+  getUserById: async (id: string): Promise<User> => {
+    return apiClient<User>(`/admin/users/${id}`);
+  },
+
+  /**
+   * POST /api/admin/users
+   * Create new user
+   * Roles: admin
+   */
+  createUser: async (data: CreateUserDto): Promise<User> => {
+    return apiClient<User>('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * PATCH /api/admin/users/:id
+   * Update user
+   * Roles: admin
+   */
+  updateUser: async (id: string, data: UpdateUserDto): Promise<User> => {
+    return apiClient<User>(`/admin/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * DELETE /api/admin/users/:id
+   * Delete user
+   * Roles: admin
+   */
+  deleteUser: async (id: string): Promise<void> => {
+    return apiClient<void>(`/admin/users/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
+   * GET /api/admin/metrics
    * Get system metrics and statistics
    * Roles: admin
    */
@@ -130,7 +177,7 @@ export const adminService = {
 
 export const patientService = {
   /**
-   * GET /patients
+   * GET /api/patients
    * List patients
    * Roles: admin, doctor
    */
@@ -151,7 +198,7 @@ export const patientService = {
 
 export const doctorService = {
   /**
-   * GET /doctors
+   * GET /api/doctors
    * List doctors
    * Roles: admin
    */
@@ -172,7 +219,7 @@ export const doctorService = {
 
 export const prescriptionService = {
   /**
-   * POST /prescriptions
+   * POST /api/prescriptions
    * Create a new prescription
    * Roles: doctor
    */
@@ -184,26 +231,23 @@ export const prescriptionService = {
   },
 
   /**
-   * GET /prescriptions
+   * GET /api/prescriptions
    * List doctor's prescriptions
    * Roles: doctor
+   * Returns: PaginatedResponse<Prescription> or Prescription[]
    */
-  getMyPrescriptions: async (filters?: PrescriptionFilters): Promise<PaginatedResponse<Prescription>> => {
+  getMyPrescriptions: async (filters?: PrescriptionFilters): Promise<PaginatedResponse<Prescription> | Prescription[]> => {
     const params = new URLSearchParams();
     
-    // By default, mine=true for doctors
-    if (filters?.mine !== undefined) params.append('mine', filters.mine.toString());
     if (filters?.status) params.append('status', filters.status);
-    if (filters?.from) params.append('from', filters.from);
-    if (filters?.to) params.append('to', filters.to);
-    if (filters?.page) params.append('page', filters.page.toString());
-    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.patientId) params.append('patientId', filters.patientId);
 
-    return apiClient<PaginatedResponse<Prescription>>(`/prescriptions?${params.toString()}`);
+    const queryString = params.toString();
+    return apiClient<any>(`/prescriptions${queryString ? `?${queryString}` : ''}`);
   },
 
   /**
-   * GET /prescriptions/:id
+   * GET /api/prescriptions/:id
    * Get prescription detail
    * Roles: doctor
    */
@@ -218,7 +262,7 @@ export const prescriptionService = {
 
 export const patientPrescriptionService = {
   /**
-   * GET /prescriptions/me/prescriptions
+   * GET /api/prescriptions/me/prescriptions
    * Get my prescriptions as patient
    * Roles: patient
    */
@@ -233,7 +277,7 @@ export const patientPrescriptionService = {
   },
 
   /**
-   * GET /prescriptions/:id
+   * GET /api/prescriptions/:id
    * Get prescription detail (patient view)
    * Note: Uses different endpoint structure than doctor
    */
@@ -242,7 +286,7 @@ export const patientPrescriptionService = {
   },
 
   /**
-   * PUT /prescriptions/:id/consume
+   * PUT /api/prescriptions/:id/consume
    * Mark prescription as consumed
    * Roles: patient
    */
@@ -253,7 +297,7 @@ export const patientPrescriptionService = {
   },
 
   /**
-   * GET /prescriptions/:id/pdf
+   * GET /api/prescriptions/:id/pdf
    * Download prescription as PDF
    * Roles: patient
    * Returns: Blob (binary PDF file)
@@ -280,9 +324,10 @@ export const patientPrescriptionService = {
 
 export const adminPrescriptionService = {
   /**
-   * GET /prescriptions/admin/prescriptions
+   * GET /api/prescriptions/admin/prescriptions
    * Get all system prescriptions
    * Roles: admin
+   * Returns: PaginatedResponse<Prescription> (formato paginado)
    */
   getAllPrescriptions: async (filters?: AdminPrescriptionFilters): Promise<PaginatedResponse<Prescription>> => {
     const params = new URLSearchParams();
@@ -290,16 +335,13 @@ export const adminPrescriptionService = {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.doctorId) params.append('doctorId', filters.doctorId);
     if (filters?.patientId) params.append('patientId', filters.patientId);
-    if (filters?.from) params.append('from', filters.from);
-    if (filters?.to) params.append('to', filters.to);
-    if (filters?.page) params.append('page', filters.page.toString());
-    if (filters?.limit) params.append('limit', filters.limit.toString());
 
-    return apiClient<PaginatedResponse<Prescription>>(`/prescriptions/admin/prescriptions?${params.toString()}`);
+    const queryString = params.toString();
+    return apiClient<PaginatedResponse<Prescription>>(`/prescriptions/admin/prescriptions${queryString ? `?${queryString}` : ''}`);
   },
 
   /**
-   * GET /prescriptions/:id
+   * GET /api/prescriptions/:id
    * Get prescription detail (admin view)
    */
   getById: async (id: string): Promise<Prescription> => {
@@ -330,3 +372,5 @@ export const downloadPrescriptionPDF = async (id: string, code: string): Promise
     throw error;
   }
 };
+
+

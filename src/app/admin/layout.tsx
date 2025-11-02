@@ -6,6 +6,7 @@ import { LayoutDashboard, Users, FileText } from 'lucide-react';
 
 const adminMenuItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { label: 'Usuarios', href: '/admin/users', icon: Users },
   { label: 'Prescripciones', href: '/admin/prescriptions', icon: FileText },
 ];
 

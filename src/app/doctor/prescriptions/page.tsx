@@ -35,23 +35,40 @@ export default function DoctorPrescriptionsPage() {
       setIsLoading(true);
       setError(null);
 
-      const data = await prescriptionService.getMyPrescriptions({
+      console.log('🔍 Loading doctor prescriptions...');
+      
+      const response = await prescriptionService.getMyPrescriptions({
         status: (filters.status as PrescriptionStatus) || undefined,
-        from: filters.from || undefined,
-        to: filters.to || undefined,
-        page: filters.page,
-        limit: 10,
+        patientId: undefined,
       });
 
-      setPrescriptions(data.data);
-      setPagination({
-        page: data.meta.page,
-        totalPages: data.meta.totalPages,
-        total: data.meta.total,
-      });
+      console.log('✅ Doctor prescriptions loaded:', response);
+
+      // El backend puede devolver formato paginado { data: [...], meta: {...} } o array directo
+      const prescriptionsArray = (response as any).data || response;
+      const isArray = Array.isArray(prescriptionsArray);
+      
+      setPrescriptions(isArray ? prescriptionsArray : []);
+      
+      // Usar meta si existe
+      const meta = (response as any).meta;
+      if (meta) {
+        setPagination({
+          page: meta.page || 1,
+          totalPages: meta.totalPages || 1,
+          total: meta.total || prescriptionsArray.length,
+        });
+      } else {
+        setPagination({
+          page: 1,
+          totalPages: 1,
+          total: isArray ? prescriptionsArray.length : 0,
+        });
+      }
     } catch (err: any) {
-      console.error('Error loading prescriptions:', err);
+      console.error('❌ Error loading prescriptions:', err);
       setError(err.message || 'Error al cargar prescripciones');
+      setPrescriptions([]);
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +81,6 @@ export default function DoctorPrescriptionsPage() {
     // Update URL
     const params = new URLSearchParams();
     if (updated.status) params.set('status', updated.status);
-    if (updated.from) params.set('from', updated.from);
-    if (updated.to) params.set('to', updated.to);
-    if (updated.page > 1) params.set('page', updated.page.toString());
 
     router.push(`?${params.toString()}`, { scroll: false });
   };

@@ -11,6 +11,27 @@ export interface User {
   createdAt?: string;
 }
 
+export interface CreateUserDto {
+  email: string;
+  password: string;
+  name: string;
+  role: Role;
+}
+
+export interface UpdateUserDto {
+  email?: string;
+  name?: string;
+  role?: Role;
+  password?: string;
+}
+
+export interface UserFilters {
+  role?: Role;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface AuthProfile {
   id: string;
   email: string;
@@ -120,6 +141,7 @@ export interface CreatePrescriptionDto {
 export interface PrescriptionFilters {
   mine?: boolean;
   status?: PrescriptionStatus;
+  patientId?: string;
   from?: string;
   to?: string;
   page?: number;

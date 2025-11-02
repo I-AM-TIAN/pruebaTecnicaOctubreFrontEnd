@@ -55,28 +55,46 @@ export default function AdminPrescriptionsPage() {
       setIsLoading(true);
       setError(null);
 
-      const params = new URLSearchParams({
-        page: filters.page.toString(),
-        limit: '10',
-      });
+      const params = new URLSearchParams();
 
       if (filters.status) params.append('status', filters.status);
       if (filters.doctorId) params.append('doctorId', filters.doctorId);
       if (filters.patientId) params.append('patientId', filters.patientId);
-      if (filters.from) params.append('from', filters.from);
-      if (filters.to) params.append('to', filters.to);
+      if (filters.page) params.append('page', filters.page.toString());
+      params.append('limit', '10'); // 10 prescripciones por página
       
-      const data = await apiClient<PaginatedResponse<Prescription>>(`/prescriptions/admin/prescriptions?${params}`);
+      const queryString = params.toString();
+      const url = `/prescriptions/admin/prescriptions${queryString ? `?${queryString}` : ''}`;
+      console.log('🔍 Loading prescriptions from:', url);
       
-      setPrescriptions(data.data);
-      setPagination({
-        page: data.meta.page,
-        totalPages: data.meta.totalPages,
-        total: data.meta.total,
-      });
+      const response = await apiClient<any>(url);
+      
+      console.log('✅ Prescriptions loaded:', response);
+      
+      // El backend devuelve formato paginado { data: [...], meta: {...} }
+      const prescriptionsArray = response.data || response;
+      const isArray = Array.isArray(prescriptionsArray);
+      
+      setPrescriptions(isArray ? prescriptionsArray : []);
+      
+      // Usar meta si existe, sino usar totales del array
+      if (response.meta) {
+        setPagination({
+          page: response.meta.page || 1,
+          totalPages: response.meta.totalPages || 1,
+          total: response.meta.total || prescriptionsArray.length,
+        });
+      } else {
+        setPagination({
+          page: 1,
+          totalPages: 1,
+          total: isArray ? prescriptionsArray.length : 0,
+        });
+      }
     } catch (err: any) {
-      console.error('Error loading prescriptions:', err);
+      console.error('❌ Error loading prescriptions:', err);
       setError(err.message || 'Error al cargar prescripciones');
+      setPrescriptions([]);
     } finally {
       setIsLoading(false);
     }
@@ -96,8 +114,6 @@ export default function AdminPrescriptionsPage() {
     if (updated.status) params.set('status', updated.status);
     if (updated.doctorId) params.set('doctorId', updated.doctorId);
     if (updated.patientId) params.set('patientId', updated.patientId);
-    if (updated.from) params.set('from', updated.from);
-    if (updated.to) params.set('to', updated.to);
     if (updated.page > 1) params.set('page', updated.page.toString());
 
     router.push(`?${params.toString()}`, { scroll: false });
