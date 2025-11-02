@@ -110,7 +110,17 @@ export const adminService = {
     if (filters?.to) params.append('to', filters.to);
 
     const endpoint = params.toString() ? `/admin/metrics?${params.toString()}` : '/admin/metrics';
-    return apiClient<AdminMetrics>(endpoint);
+
+    // Call the API and defensively unwrap common response wrappers like
+    // { data: { ... } } or { data: { data: { ... } } } (some middlewares/clients
+    // or the backend itself may wrap the payload). Return the actual AdminMetrics
+    // object so callers don't have to handle different shapes.
+    const raw: any = await apiClient(endpoint as any);
+    let payload: any = raw;
+    if (payload && typeof payload === 'object' && 'data' in payload) payload = payload.data;
+    if (payload && typeof payload === 'object' && 'data' in payload) payload = payload.data;
+
+    return payload as AdminMetrics;
   },
 };
 

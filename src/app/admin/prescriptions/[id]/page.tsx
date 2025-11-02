@@ -37,6 +37,7 @@ export default function AdminPrescriptionDetailPage({ params }: PageProps) {
     try {
       setIsLoading(true);
       setError(null);
+      // Usar el servicio de admin que ya está definido
       const data = await apiClient<Prescription>(`/prescriptions/${prescriptionId}`);
       setPrescription(data);
     } catch (err: any) {

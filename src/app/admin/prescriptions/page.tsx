@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Eye } from 'lucide-react';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import apiClient from '@/lib/api-client';
 import type { Prescription, PaginatedResponse, Doctor, Patient } from '@/types';
@@ -182,19 +180,6 @@ export default function AdminPrescriptionsPage() {
         <div className="text-sm text-gray-700">
           {item.consumedAt ? format(new Date(item.consumedAt), 'dd/MM/yyyy', { locale: es }) : 'N/A'}
         </div>
-      ),
-    },
-    {
-      key: 'actions',
-      label: 'Acciones',
-      render: (item) => (
-        <Link
-          href={`/admin/prescriptions/${item.id}`}
-          className="inline-flex items-center text-primary-600 hover:text-primary-800"
-        >
-          <Eye className="h-4 w-4 mr-1" />
-          Ver
-        </Link>
       ),
     },
   ];
