@@ -220,11 +220,11 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
             </span>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             {prescription.status === 'pending' && (
               <button
                 onClick={() => setConsumeDialog(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium w-full sm:w-auto"
               >
                 <CheckCircle className="w-4 h-4" />
                 Marcar como Consumida
@@ -232,7 +232,7 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
             )}
             <button
               onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
+              className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium w-full sm:w-auto"
             >
               <Download className="w-4 h-4" />
               Descargar PDF

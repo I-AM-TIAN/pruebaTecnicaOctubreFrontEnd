@@ -28,8 +28,6 @@ export default function NewPrescriptionPage() {
     try {
       setLoadingPatients(true);
       const data = await patientService.getPatients({ limit: 100 });
-      console.log('Patients loaded:', data);
-      console.log('First patient sample:', data.data[0]);
       setPatients(data.data);
     } catch (error: any) {
       console.error('Error loading patients:', error);
@@ -83,16 +81,12 @@ export default function NewPrescriptionPage() {
         })),
       };
 
-      console.log('Creating prescription with DTO:', dto);
-      console.log('Selected patient from state:', patients.find(p => (p as any).id === formData.patientId));
-
       await prescriptionService.create(dto);
 
       toast.success('Prescripción creada exitosamente');
       router.push('/doctor/prescriptions');
     } catch (error: any) {
       console.error('Error creating prescription:', error);
-      console.error('Error details:', { message: error.message, status: error.status, data: error.data });
       
       // Manejo específico de errores comunes
       if (error.message?.includes('Patient not found') || error.message?.includes('not found')) {
