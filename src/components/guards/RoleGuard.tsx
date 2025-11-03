@@ -32,13 +32,11 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
         return;
       }
 
-      // Admin can access everything
       if (user?.role === 'admin') {
         console.log('Admin user - access granted');
         return;
       }
 
-      // Other roles must be explicitly allowed
       const hasAccess = allowedRoles.includes(user?.role as Role);
       console.log('Role check:', {
         userRole: user?.role,
@@ -63,13 +61,11 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
     );
   }
 
-  // Admin can access everything
   if (isAuthenticated && user?.role === 'admin') {
     console.log('RoleGuard: Rendering children for admin');
     return <>{children}</>;
   }
 
-  // Check if user role is in allowed roles
   if (!isAuthenticated || !user || !allowedRoles.includes(user.role)) {
     console.log('RoleGuard: Access denied, returning null');
     return null;

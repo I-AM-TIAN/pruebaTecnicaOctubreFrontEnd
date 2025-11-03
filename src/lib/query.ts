@@ -25,7 +25,6 @@ export function queryStringToFilters<T extends Record<string, any>>(
   Object.keys(defaults).forEach((key) => {
     const value = searchParams.get(key);
     if (value !== null) {
-      // Intentar convertir a número si el default es número
       if (typeof defaults[key] === 'number') {
         filters[key] = parseInt(value, 10) || defaults[key];
       } else {

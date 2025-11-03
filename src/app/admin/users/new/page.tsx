@@ -69,7 +69,6 @@ export default function NewUserPage() {
 
   const handleChange = (field: keyof CreateUserDto, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }

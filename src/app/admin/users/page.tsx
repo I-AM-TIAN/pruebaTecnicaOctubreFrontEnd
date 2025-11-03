@@ -36,17 +36,13 @@ export default function AdminUsersPage() {
         limit,
       });
 
-      // Handle different response formats
       if (Array.isArray(response)) {
-        // Backend returned array directly
         setUsers(response);
         setTotalPages(1);
       } else if (response && response.data) {
-        // Backend returned paginated response
         setUsers(response.data);
         setTotalPages(response.meta?.totalPages || 1);
       } else {
-        // Unexpected format
         setUsers([]);
         setTotalPages(0);
       }

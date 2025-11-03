@@ -18,7 +18,6 @@ export default function DoctorPrescriptionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters from URL
   const [filters, setFilters] = useState({
     status: searchParams.get('status') as PrescriptionStatus | '' || '',
     from: searchParams.get('from') || '',
@@ -44,13 +43,11 @@ export default function DoctorPrescriptionsPage() {
 
       console.log('✅ Doctor prescriptions loaded:', response);
 
-      // El backend puede devolver formato paginado { data: [...], meta: {...} } o array directo
       const prescriptionsArray = (response as any).data || response;
       const isArray = Array.isArray(prescriptionsArray);
       
       setPrescriptions(isArray ? prescriptionsArray : []);
       
-      // Usar meta si existe
       const meta = (response as any).meta;
       if (meta) {
         setPagination({
@@ -78,7 +75,6 @@ export default function DoctorPrescriptionsPage() {
     const updated = { ...filters, ...newFilters, page: 1 };
     setFilters(updated);
 
-    // Update URL
     const params = new URLSearchParams();
     if (updated.status) params.set('status', updated.status);
 

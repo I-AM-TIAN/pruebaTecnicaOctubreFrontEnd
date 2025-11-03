@@ -5,7 +5,6 @@ const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL as string) || 'http:/
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
 
-// Initialize tokens from localStorage on load
 if (typeof window !== 'undefined') {
   accessToken = localStorage.getItem('accessToken');
   refreshToken = localStorage.getItem('refreshToken');
@@ -101,20 +100,6 @@ export async function apiClient<T = any>(
     ...(fetchOptions.headers as Record<string, string>),
   };
 
-  // Debug info in development: do not print raw tokens
-  if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-    try {
-      console.debug('apiClient -> request', {
-        url,
-        method: (fetchOptions.method || 'GET').toString(),
-        hasAuth: !!headers['Authorization'],
-      });
-    } catch (e) {
-      // swallow any debug error
-    }
-  }
-
-  // Add authorization header if not skipped
   if (!skipAuth) {
     const tokens = getTokens();
     if (tokens?.accessToken) {
@@ -127,19 +112,10 @@ export async function apiClient<T = any>(
     headers,
   });
 
-  // Debug response info (dev only)
-  if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-    try {
-      console.debug('apiClient -> response status', { url, status: response.status });
-    } catch (e) {}
-  }
-
-  // Handle 401 - Try to refresh token
   if (response.status === 401 && !skipAuth) {
     const refreshed = await refreshAccessToken();
     
     if (refreshed) {
-      // Retry the request with new token
       const tokens = getTokens();
       if (tokens?.accessToken) {
         headers['Authorization'] = `Bearer ${tokens.accessToken}`;
@@ -150,7 +126,6 @@ export async function apiClient<T = any>(
         headers,
       });
     } else {
-      // Refresh failed, redirect to login
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
       }
@@ -162,11 +137,6 @@ export async function apiClient<T = any>(
     const error: any = new Error('API request failed');
     try {
       const errorData = await response.json();
-      // In dev, log backend error payload for debugging (do not leak tokens)
-      if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-        try { console.debug('apiClient -> error payload', { url, status: response.status, errorData }); } catch (e) {}
-      }
-
       error.message = errorData.message || error.message;
       error.status = response.status;
       error.data = errorData;
@@ -177,21 +147,11 @@ export async function apiClient<T = any>(
     throw error;
   }
 
-  // Handle responses without body
   const contentType = response.headers.get('content-type');
-  // If response is JSON, parse and defensively unwrap common wrappers like
-  // { data: { ... } } or { data: { data: { ... } } } so callers always receive
-  // the inner payload directly. This centralizes handling of axios/back-end
-  // wrappers and avoids repeating unwrapping logic in every service.
   if (contentType && contentType.includes('application/json')) {
     const data = await response.json();
     let payload: any = data;
 
-    // Unwrap a single top-level `data` wrapper. Many backends return
-    // { data: { ... } } (or Axios returns res.data). Unwrapping only one
-    // level ensures we don't accidentally strip nested structures like
-    // { data: { data: [...], meta: {...} } } which would remove `meta` if
-    // unwrapped twice.
     if (payload && typeof payload === 'object' && 'data' in payload) {
       payload = payload.data;
     }

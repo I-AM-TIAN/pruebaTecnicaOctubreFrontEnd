@@ -76,7 +76,6 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
     if (!prescription) return;
 
     try {
-      // Obtener el token del localStorage
       const token = localStorage.getItem('accessToken');
       
       if (!token) {
@@ -89,7 +88,6 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
       
       toast.success('Descargando PDF...');
 
-      // Usar fetch con el token en el header
       const response = await fetch(
         `${apiBaseUrl}/prescriptions/${prescription.id}/pdf`,
         {
@@ -100,7 +98,6 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
         }
       );
 
-      // Manejar token expirado
       if (response.status === 401) {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
@@ -115,7 +112,6 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
               const data = await refreshResponse.json();
               localStorage.setItem('accessToken', data.accessToken);
               localStorage.setItem('refreshToken', data.refreshToken);
-              // Reintentar descarga
               return handleDownloadPDF();
             }
           } catch (refreshError) {
@@ -123,7 +119,6 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
           }
         }
         
-        // Si llegamos aquí, el refresh falló
         toast.error('Sesión expirada. Por favor inicia sesión nuevamente.');
         localStorage.clear();
         router.push('/login');
@@ -134,22 +129,15 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
         throw new Error('Error al descargar PDF');
       }
 
-      // Convertir respuesta a blob
       const blob = await response.blob();
-      
-      // Crear URL temporal del blob
       const url = window.URL.createObjectURL(blob);
-      
-      // Abrir en nueva pestaña
       const newWindow = window.open(url, '_blank');
       
-      // Limpiar URL temporal después de que se abra
       if (newWindow) {
         newWindow.onload = () => {
           setTimeout(() => window.URL.revokeObjectURL(url), 1000);
         };
       } else {
-        // Si no se pudo abrir la ventana, ofrecer descarga
         const link = document.createElement('a');
         link.href = url;
         link.download = `prescription-${prescription.id}.pdf`;

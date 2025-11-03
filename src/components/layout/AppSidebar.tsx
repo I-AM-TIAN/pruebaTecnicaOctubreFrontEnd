@@ -95,10 +95,6 @@ export function AppSidebar({ items, userInfo }: AppSidebarProps) {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {items.map((item) => {
             const Icon = item.icon;
-            // Marcar como activo solo si:
-            // 1. Es exactamente la ruta (pathname === item.href)
-            // 2. O es una subruta directa con ID (para ver detalles)
-            // Pero Dashboard solo se activa en la ruta exacta
             const isActive = item.href === '/admin' || item.href === '/doctor' || item.href === '/patient'
               ? pathname === item.href
               : pathname === item.href || 

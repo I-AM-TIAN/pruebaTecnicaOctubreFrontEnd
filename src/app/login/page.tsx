@@ -22,10 +22,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Login returns user + tokens
       const response = await authLogin(formData);
       
-      // Use user from login response directly
       setUser({
         id: response.user.id,
         email: response.user.email,
@@ -35,10 +33,8 @@ export default function LoginPage() {
 
       toast.success('Sesión iniciada correctamente');
 
-      // Small delay to ensure state is updated
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Redirect based on role (lowercase from backend)
       const role = response.user.role;
       const targetRoute = role === 'admin' 
         ? '/admin'

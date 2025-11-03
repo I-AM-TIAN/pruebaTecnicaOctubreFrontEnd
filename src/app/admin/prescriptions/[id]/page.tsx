@@ -58,7 +58,6 @@ export default function AdminPrescriptionDetailPage({ params }: PageProps) {
         return;
       }
 
-      // Usar la misma base URL que apiClient
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001/api';
 
       const response = await fetch(

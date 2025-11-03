@@ -1,14 +1,3 @@
-/**
- * Tests Básicos del Sistema de Prescripciones
- * 
- * Este archivo contiene tests unitarios para verificar
- * las funcionalidades core del sistema.
- */
-
-// =============================================================================
-// TEST 1: Auth Token Management
-// =============================================================================
-
 describe('Auth Token Management', () => {
   const mockTokens = {
     accessToken: 'mock_access_token_12345',
@@ -30,10 +19,6 @@ describe('Auth Token Management', () => {
     expect(statusCode401).toBe(401);
   });
 });
-
-// =============================================================================
-// TEST 2: Role-Based Access Control (RBAC)
-// =============================================================================
 
 describe('Role-Based Access Control', () => {
   type Role = 'admin' | 'doctor' | 'patient';
@@ -71,10 +56,6 @@ describe('Role-Based Access Control', () => {
     expect(getRouteByRole('patient')).toBe('/patient/prescriptions');
   });
 });
-
-// =============================================================================
-// TEST 3: Query String Helpers
-// =============================================================================
 
 describe('Query String Helpers', () => {
   function filtersToQueryString(filters: Record<string, any>): string {
@@ -132,10 +113,6 @@ describe('Query String Helpers', () => {
   });
 });
 
-// =============================================================================
-// TEST 4: Date Utilities
-// =============================================================================
-
 describe('Date Utilities', () => {
   function formatDateForAPI(date: Date): string {
     return date.toISOString().split('T')[0];
@@ -159,10 +136,6 @@ describe('Date Utilities', () => {
     expect(sevenDaysAgo.getTime()).toBeLessThan(today.getTime());
   });
 });
-
-// =============================================================================
-// TEST 5: Prescription Data Validation
-// =============================================================================
 
 describe('Prescription Data Validation', () => {
   interface PrescriptionItem {
@@ -194,10 +167,6 @@ describe('Prescription Data Validation', () => {
     expect(validatePrescriptionItem(invalidItem)).toBe(false);
   });
 });
-
-// =============================================================================
-// TEST 6: DataTable Pagination Logic
-// =============================================================================
 
 describe('DataTable Pagination', () => {
   interface PaginationState {

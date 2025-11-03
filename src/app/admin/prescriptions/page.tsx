@@ -71,13 +71,11 @@ export default function AdminPrescriptionsPage() {
       
       console.log('✅ Prescriptions loaded:', response);
       
-      // El backend devuelve formato paginado { data: [...], meta: {...} }
       const prescriptionsArray = response.data || response;
       const isArray = Array.isArray(prescriptionsArray);
       
       setPrescriptions(isArray ? prescriptionsArray : []);
       
-      // Usar meta si existe, sino usar totales del array
       if (response.meta) {
         setPagination({
           page: response.meta.page || 1,
@@ -101,7 +99,6 @@ export default function AdminPrescriptionsPage() {
   };
 
   const updateFilters = (newFilters: Partial<typeof filters>) => {
-    // Solo resetear a página 1 si se cambia algo diferente a la página
     const shouldResetPage = !('page' in newFilters);
     const updated = { 
       ...filters, 
@@ -128,7 +125,6 @@ export default function AdminPrescriptionsPage() {
         return;
       }
 
-      // Usar la misma base URL que apiClient
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001/api';
 
       const response = await fetch(
@@ -303,7 +299,6 @@ export default function AdminPrescriptionsPage() {
                 const doctorObj = doctor as any;
                 const name = doctorObj.name || doctorObj.email || 'Sin nombre';
                 const specialty = doctorObj.doctor?.specialty || '';
-                // El userId correcto está en doctor.id (ID del registro Doctor, no del User)
                 const doctorId = doctorObj.doctor?.id || doctorObj.id;
                 return (
                   <option key={doctorObj.id} value={doctorId}>
@@ -325,7 +320,6 @@ export default function AdminPrescriptionsPage() {
               {patients.map((patient) => {
                 const patientObj = patient as any;
                 const name = patientObj.name || patientObj.email || 'Sin nombre';
-                // El patientId correcto está en patient.id (similar a doctor.id)
                 const patientId = patientObj.patient?.id || patientObj.id;
                 return (
                   <option key={patientObj.id} value={patientId}>

@@ -5,9 +5,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { getProfile } from '@/lib/auth';
 import { getTokens } from '@/lib/api-client';
 
-interface AuthContextValue {
-  // This can be extended if needed
-}
+interface AuthContextValue {}
 
 const AuthContext = createContext<AuthContextValue>({});
 
@@ -16,7 +14,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      // Skip initialization if user is already set (e.g., from login)
       if (user) {
         console.log('AuthProvider: User already set:', user);
         setLoading(false);

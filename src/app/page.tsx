@@ -11,7 +11,6 @@ export default function HomePage() {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated && user) {
-        // Redirect based on role
         switch (user.role) {
           case 'admin':
             router.push('/admin');

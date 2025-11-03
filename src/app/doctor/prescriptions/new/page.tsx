@@ -56,7 +56,6 @@ export default function NewPrescriptionPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validation
     if (!formData.patientId.trim()) {
       toast.error('El ID del paciente es requerido');
       return;
@@ -88,7 +87,6 @@ export default function NewPrescriptionPage() {
     } catch (error: any) {
       console.error('Error creating prescription:', error);
       
-      // Manejo específico de errores comunes
       if (error.message?.includes('Patient not found') || error.message?.includes('not found')) {
         toast.error('Paciente no encontrado. Verifica que el ID sea correcto y que el usuario tenga rol de paciente.');
       } else if (error.message?.includes('items')) {
@@ -132,21 +130,15 @@ export default function NewPrescriptionPage() {
                 >
                   <option value="">Selecciona un paciente</option>
                   {patients.map((patient) => {
-                    // El backend puede devolver la estructura de diferentes formas
-                    // Intentar acceder a los datos de múltiples formas posibles
                     const patientData = patient as any;
                     
-                    // Buscar el nombre en diferentes ubicaciones
                     const name = patientData.name || 
                                 patientData.user?.name || 
                                 patientData.user?.email?.split('@')[0] || 
                                 'Paciente';
                     
-                    // Buscar el email
                     const email = patientData.email || patientData.user?.email || '';
                     
-                    // IMPORTANTE: El backend espera el ID interno del patient (patient.patient.id)
-                    // no el ID del registro principal (patient.id)
                     const patientId = patientData.patient?.id || patientData.id;
                     
                     return (

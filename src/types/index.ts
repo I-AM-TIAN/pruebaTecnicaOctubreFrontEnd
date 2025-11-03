@@ -1,6 +1,3 @@
-// ============================================
-// ROLES Y USUARIOS
-// ============================================
 export type Role = 'admin' | 'doctor' | 'patient';
 
 export interface User {
@@ -40,9 +37,6 @@ export interface AuthProfile {
   createdAt?: string;
 }
 
-// ============================================
-// AUTENTICACIÓN
-// ============================================
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -67,9 +61,6 @@ export interface RegisterResponse extends AuthTokens {
   user: User;
 }
 
-// ============================================
-// DOCTORES
-// ============================================
 export interface Doctor {
   id: string;
   user?: User;
@@ -77,9 +68,6 @@ export interface Doctor {
   licenseNumber: string;
 }
 
-// ============================================
-// PACIENTES
-// ============================================
 export interface Patient {
   id: string;
   user?: User;
@@ -88,9 +76,6 @@ export interface Patient {
   phone?: string;
 }
 
-// ============================================
-// PRESCRIPCIONES
-// ============================================
 export type PrescriptionStatus = 'pending' | 'consumed';
 
 export interface PrescriptionItem {
@@ -112,7 +97,6 @@ export interface Prescription {
   createdAt: string;
   consumedAt?: string | null;
   items: PrescriptionItem[];
-  // Relaciones expandidas
   patient?: {
     id: string;
     user?: User;
@@ -135,9 +119,6 @@ export interface CreatePrescriptionDto {
   }>;
 }
 
-// ============================================
-// FILTROS
-// ============================================
 export interface PrescriptionFilters {
   mine?: boolean;
   status?: PrescriptionStatus;
@@ -176,9 +157,6 @@ export interface DoctorFilters {
   limit?: number;
 }
 
-// ============================================
-// PAGINACIÓN
-// ============================================
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
@@ -189,9 +167,6 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// ============================================
-// MÉTRICAS DE ADMIN
-// ============================================
 export interface AdminMetrics {
   totals: {
     doctors: number;

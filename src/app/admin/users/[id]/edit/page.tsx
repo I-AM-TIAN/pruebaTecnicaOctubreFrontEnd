@@ -74,7 +74,6 @@ export default function EditUserPage() {
     try {
       setSaving(true);
       
-      // Only send fields that have values
       const updateData: UpdateUserDto = {};
       if (formData.email) updateData.email = formData.email;
       if (formData.name) updateData.name = formData.name;
@@ -93,7 +92,6 @@ export default function EditUserPage() {
 
   const handleChange = (field: keyof UpdateUserDto, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
