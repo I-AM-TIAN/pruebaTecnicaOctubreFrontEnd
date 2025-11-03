@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, Download } from 'lucide-react';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import apiClient from '@/lib/api-client';
 import type { Prescription, PaginatedResponse, Doctor, Patient } from '@/types';
@@ -33,7 +34,6 @@ export default function AdminPrescriptionsPage() {
 
   useEffect(() => {
     loadPrescriptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const loadDoctorsAndPatients = async () => {
@@ -119,6 +119,50 @@ export default function AdminPrescriptionsPage() {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
+  const handleDownloadPDF = async (prescription: Prescription) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        console.error('No access token found');
+        return;
+      }
+
+      // Usar la misma base URL que apiClient
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001/api';
+
+      const response = await fetch(
+        `${apiBaseUrl}/prescriptions/${prescription.id}/pdf`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Error al descargar PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prescripcion-${prescription.code}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    }
+  };
+
+  const handleViewDetail = (prescription: Prescription) => {
+    router.push(`/admin/prescriptions/${prescription.id}`);
+  };
+
   const columns: Column<Prescription>[] = [
     {
       key: 'code',
@@ -195,6 +239,28 @@ export default function AdminPrescriptionsPage() {
       render: (item) => (
         <div className="text-sm text-gray-700">
           {item.consumedAt ? format(new Date(item.consumedAt), 'dd/MM/yyyy', { locale: es }) : 'N/A'}
+        </div>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (item) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleViewDetail(item)}
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            title="Ver detalle"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDownloadPDF(item)}
+            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            title="Descargar PDF"
+          >
+            <Download className="w-4 h-4" />
+          </button>
         </div>
       ),
     },

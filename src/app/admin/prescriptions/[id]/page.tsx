@@ -37,7 +37,6 @@ export default function AdminPrescriptionDetailPage({ params }: PageProps) {
     try {
       setIsLoading(true);
       setError(null);
-      // Usar el servicio de admin que ya está definido
       const data = await apiClient<Prescription>(`/prescriptions/${prescriptionId}`);
       setPrescription(data);
     } catch (err: any) {
@@ -55,10 +54,12 @@ export default function AdminPrescriptionDetailPage({ params }: PageProps) {
       const token = localStorage.getItem('accessToken');
       
       if (!token) {
+        console.error('No access token found');
         return;
       }
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001';
+      // Usar la misma base URL que apiClient
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001/api';
 
       const response = await fetch(
         `${apiBaseUrl}/prescriptions/${prescription.id}/pdf`,
