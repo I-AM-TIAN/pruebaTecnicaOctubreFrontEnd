@@ -94,6 +94,13 @@ export async function apiClient<T = any>(
   const { skipAuth = false, ...fetchOptions } = options;
 
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  
+  console.log('🌐 API Request:', {
+    endpoint,
+    url,
+    API_BASE_URL,
+    method: fetchOptions.method || 'GET'
+  });
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

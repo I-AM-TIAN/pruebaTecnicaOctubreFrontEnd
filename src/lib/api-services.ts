@@ -90,9 +90,11 @@ export const adminService = {
     if (filters?.from) params.append('from', filters.from);
     if (filters?.to) params.append('to', filters.to);
 
-    const endpoint = params.toString() ? `/admin/metrics?${params.toString()}` : '/admin/metrics';
+    const queryString = params.toString();
+    const endpoint = queryString ? `/metrics?${queryString}` : '/metrics';
 
-    const raw: any = await apiClient(endpoint as any);
+    console.log('🔍 Fetching metrics from endpoint:', endpoint);
+    const raw: any = await apiClient(endpoint);
     let payload: any = raw;
     if (payload && typeof payload === 'object' && 'data' in payload) payload = payload.data;
     if (payload && typeof payload === 'object' && 'data' in payload) payload = payload.data;
