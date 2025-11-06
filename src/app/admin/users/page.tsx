@@ -24,10 +24,6 @@ export default function AdminUsersPage() {
     userId: null,
   });
 
-  useEffect(() => {
-    loadUsers();
-  }, [page, limit]);
-
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -53,6 +49,11 @@ export default function AdminUsersPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit]);
 
   const handleDelete = async () => {
     if (!deleteDialog.userId) return;

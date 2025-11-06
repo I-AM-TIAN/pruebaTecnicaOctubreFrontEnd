@@ -16,10 +16,6 @@ export default function UserDetailPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadUser();
-  }, [userId]);
-
   const loadUser = async () => {
     try {
       setLoading(true);
@@ -32,6 +28,11 @@ export default function UserDetailPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   if (loading) {
     return (

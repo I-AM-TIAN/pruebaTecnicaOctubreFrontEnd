@@ -25,12 +25,6 @@ export default function DoctorPrescriptionDetailPage({ params }: PageProps) {
     });
   }, [params]);
 
-  useEffect(() => {
-    if (prescriptionId) {
-      loadPrescription();
-    }
-  }, [prescriptionId]);
-
   const loadPrescription = async () => {
     if (!prescriptionId) return;
 
@@ -46,6 +40,13 @@ export default function DoctorPrescriptionDetailPage({ params }: PageProps) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (prescriptionId) {
+      loadPrescription();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prescriptionId]);
 
   if (isLoading) {
     return (
@@ -153,7 +154,7 @@ export default function DoctorPrescriptionDetailPage({ params }: PageProps) {
           <div className="bg-white rounded-lg p-4 mt-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Transcripción:</h3>
             <p className="text-gray-900 text-sm leading-relaxed italic">
-              "{prescription.transcription}"
+              &ldquo;{prescription.transcription}&rdquo;
             </p>
           </div>
         </div>
