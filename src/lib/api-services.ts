@@ -135,14 +135,49 @@ export const prescriptionService = {
     });
   },
 
-  getMyPrescriptions: async (filters?: PrescriptionFilters): Promise<PaginatedResponse<Prescription> | Prescription[]> => {
+  createFromAudio: async (audioFile: File, patientId: string): Promise<Prescription> => {
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+    formData.append('patientId', patientId);
+
+    const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/prescriptions/from-audio`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Error al crear prescripción' }));
+      throw new Error(error.message || `Error ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  getMine: async (filters?: PrescriptionFilters): Promise<any> => {
     const params = new URLSearchParams();
+
     
     if (filters?.status) params.append('status', filters.status);
     if (filters?.patientId) params.append('patientId', filters.patientId);
 
     const queryString = params.toString();
     return apiClient<any>(`/prescriptions${queryString ? `?${queryString}` : ''}`);
+  },
+
+  getMyPrescriptions: async (filters?: PrescriptionFilters): Promise<PaginatedResponse<Prescription>> => {
+    const params = new URLSearchParams();
+    
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.patientId) params.append('patientId', filters.patientId);
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+
+    return apiClient<PaginatedResponse<Prescription>>(`/prescriptions?${params.toString()}`);
   },
 
   getById: async (id: string): Promise<Prescription> => {

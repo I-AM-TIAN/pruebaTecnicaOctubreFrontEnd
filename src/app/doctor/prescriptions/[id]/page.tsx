@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calendar, User, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, User, FileText, Mic } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import type { Prescription } from '@/types';
 import { format } from 'date-fns';
@@ -136,6 +136,28 @@ export default function DoctorPrescriptionDetailPage({ params }: PageProps) {
 
 
       </div>
+
+      {/* Transcripción de Audio (si existe) */}
+      {prescription.transcription && prescription.aiProcessed && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-6 mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="bg-purple-600 p-2 rounded-lg">
+              <Mic className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Prescripción creada por Audio + IA</h2>
+              <p className="text-sm text-gray-600">Esta prescripción fue generada automáticamente a partir de un audio</p>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Transcripción:</h3>
+            <p className="text-gray-900 text-sm leading-relaxed italic">
+              "{prescription.transcription}"
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Medications */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">

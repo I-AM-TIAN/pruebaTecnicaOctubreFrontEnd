@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Eye } from 'lucide-react';
+import { Plus, Eye, Mic } from 'lucide-react';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { prescriptionService } from '@/lib/api-services';
 import type { Prescription, PaginatedResponse, PrescriptionStatus } from '@/types';
@@ -130,13 +130,22 @@ export default function DoctorPrescriptionsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Prescripciones creadas</h1>
           <p className="text-gray-600 mt-2">Gestiona tus prescripciones médicas</p>
         </div>
-        <Link
-          href="/doctor/prescriptions/new"
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          Nueva Prescripción
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/doctor/prescriptions/new-audio"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+          >
+            <Mic className="w-5 h-5" />
+            Crear por Audio
+          </Link>
+          <Link
+            href="/doctor/prescriptions/new"
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Nueva Prescripción
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

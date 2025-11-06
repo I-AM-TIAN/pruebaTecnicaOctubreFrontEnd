@@ -26,6 +26,7 @@ Dashboard web para la gestión de prescripciones médicas con roles de Admin, Do
 #### Doctor
 - Listar prescripciones propias
 - Crear nuevas prescripciones con múltiples medicamentos
+- **🎤 Crear prescripciones por audio con IA** (NEW!)
 - Ver detalles de prescripciones
 - Filtros por estado, fecha
 
@@ -45,6 +46,27 @@ Dashboard web para la gestión de prescripciones médicas con roles de Admin, Do
 - ✅ Toasts para feedback al usuario
 - ✅ Diseño responsive
 - ✅ Paginación en listados
+- ✅ **Grabación de audio en tiempo real**
+- ✅ **Integración con IA para transcripción y extracción**
+
+## 🎤 Audio Prescription Feature (NEW!)
+
+Los doctores ahora pueden crear prescripciones simplemente grabando un audio. El sistema:
+
+1. **Graba o acepta archivos de audio** (MP3, WAV, OGG, WEBM, M4A)
+2. **Transcribe automáticamente** usando ElevenLabs API
+3. **Extrae información estructurada** con OpenAI (medicamentos, dosis, instrucciones)
+4. **Crea la prescripción** en la base de datos
+
+### Documentación
+- **Guía de usuario**: [`AUDIO_PRESCRIPTION_GUIDE.md`](./AUDIO_PRESCRIPTION_GUIDE.md)
+- **Documentación técnica**: [`AUDIO_PRESCRIPTION_TECHNICAL.md`](./AUDIO_PRESCRIPTION_TECHNICAL.md)
+- **API docs**: [`API-AUDIO-PRESCRIPTION-DOCS.md`](./API-AUDIO-PRESCRIPTION-DOCS.md)
+
+### Acceso Rápido
+```
+/doctor/prescriptions/new-audio
+```
 
 ## 🛠️ Instalación
 

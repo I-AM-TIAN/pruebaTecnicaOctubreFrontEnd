@@ -107,6 +107,8 @@ export interface Prescription {
     user?: User;
     specialty?: string;
   };
+  transcription?: string;
+  aiProcessed?: boolean;
 }
 
 export interface CreatePrescriptionDto {
