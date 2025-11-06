@@ -134,19 +134,19 @@ export default function NewAudioPrescriptionPage() {
   const hasAudio = audioBlob || uploadedFile;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Crear Prescripción por Audio
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Graba o sube un audio dictando los medicamentos y el sistema creará la prescripción automáticamente
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 space-y-6">
           {/* Selección de Paciente */}
           <div>
             <label htmlFor="patient" className="block text-sm font-medium text-gray-700 mb-2">
@@ -255,15 +255,15 @@ export default function NewAudioPrescriptionPage() {
             </div>
 
             {/* Controles de Grabación */}
-            <div className="flex justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
               {!isRecording && !hasAudio && (
                 <button
                   onClick={startRecording}
-                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 font-semibold"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 font-semibold text-sm sm:text-base"
                   disabled={isSubmitting}
                 >
-                  <Mic className="w-5 h-5" />
-                  Iniciar Grabación
+                  <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="whitespace-nowrap">Iniciar Grabación</span>
                 </button>
               )}
 
@@ -271,17 +271,17 @@ export default function NewAudioPrescriptionPage() {
                 <>
                   <button
                     onClick={pauseRecording}
-                    className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2 font-semibold"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2 font-semibold text-sm sm:text-base"
                   >
-                    <Pause className="w-5 h-5" />
-                    Pausar
+                    <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Pausar</span>
                   </button>
                   <button
                     onClick={stopRecording}
-                    className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-semibold"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-semibold text-sm sm:text-base"
                   >
-                    <Square className="w-5 h-5" />
-                    Detener
+                    <Square className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Detener</span>
                   </button>
                 </>
               )}
@@ -290,17 +290,17 @@ export default function NewAudioPrescriptionPage() {
                 <>
                   <button
                     onClick={resumeRecording}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-semibold"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-semibold text-sm sm:text-base"
                   >
-                    <Play className="w-5 h-5" />
-                    Reanudar
+                    <Play className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Reanudar</span>
                   </button>
                   <button
                     onClick={stopRecording}
-                    className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-semibold"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-semibold text-sm sm:text-base"
                   >
-                    <Square className="w-5 h-5" />
-                    Detener
+                    <Square className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Detener</span>
                   </button>
                 </>
               )}
@@ -308,11 +308,11 @@ export default function NewAudioPrescriptionPage() {
               {hasAudio && !isRecording && (
                 <button
                   onClick={handleClearAll}
-                  className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 font-semibold"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 font-semibold text-sm sm:text-base"
                   disabled={isSubmitting}
                 >
-                  <Trash2 className="w-5 h-5" />
-                  Limpiar
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Limpiar</span>
                 </button>
               )}
             </div>
@@ -357,10 +357,10 @@ export default function NewAudioPrescriptionPage() {
               <div>
                 <label
                   htmlFor="audioUpload"
-                  className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm sm:text-base w-full sm:w-auto"
                 >
-                  <Upload className="w-5 h-5" />
-                  Subir Audio
+                  <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Subir Audio</span>
                 </label>
                 <input
                   id="audioUpload"
@@ -370,7 +370,7 @@ export default function NewAudioPrescriptionPage() {
                   className="hidden"
                   disabled={isSubmitting}
                 />
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-500 text-center sm:text-left">
                   Formatos: MP3, WAV, OGG, M4A, WEBM (máx. 10MB)
                 </p>
               </div>
@@ -379,10 +379,10 @@ export default function NewAudioPrescriptionPage() {
         </div>
 
         {/* Botones de Acción */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
           <button
             onClick={() => router.back()}
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base order-2 sm:order-1"
             disabled={isSubmitting || isRecording}
           >
             Cancelar
@@ -390,7 +390,7 @@ export default function NewAudioPrescriptionPage() {
           <button
             onClick={handleSubmit}
             disabled={!selectedPatientId || !hasAudio || isSubmitting || isRecording}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+            className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold text-sm sm:text-base order-1 sm:order-2"
           >
             {isSubmitting ? (
               <>

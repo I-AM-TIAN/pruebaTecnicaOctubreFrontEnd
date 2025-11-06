@@ -125,33 +125,33 @@ export default function DoctorPrescriptionsPage() {
   ];
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Prescripciones creadas</h1>
-          <p className="text-gray-600 mt-2">Gestiona tus prescripciones médicas</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Prescripciones creadas</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Gestiona tus prescripciones médicas</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Link
             href="/doctor/prescriptions/new-audio"
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors text-sm sm:text-base"
           >
-            <Mic className="w-5 h-5" />
-            Crear por Audio
+            <Mic className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="whitespace-nowrap">Crear por Audio</span>
           </Link>
           <Link
             href="/doctor/prescriptions/new"
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-colors text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
-            Nueva Prescripción
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="whitespace-nowrap">Nueva Prescripción</span>
           </Link>
         </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
             <select

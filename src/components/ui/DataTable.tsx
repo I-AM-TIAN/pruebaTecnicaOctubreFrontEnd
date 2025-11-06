@@ -70,6 +70,13 @@ export function DataTable<T extends { id: string }>({
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {/* Indicador de scroll horizontal en móviles */}
+      <div className="sm:hidden bg-blue-50 border-b border-blue-200 px-4 py-2 text-xs text-blue-700 flex items-center gap-2">
+        <span>↔️</span>
+        <span>Desliza para ver más columnas</span>
+      </div>
+      
+      {/* Tabla con scroll horizontal en móviles */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -77,13 +84,13 @@ export function DataTable<T extends { id: string }>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                 >
                   {column.label}
                 </th>
               ))}
               {actions && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Acciones
                 </th>
               )}
@@ -93,14 +100,14 @@ export function DataTable<T extends { id: string }>({
             {data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 {columns.map((column) => (
-                  <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td key={column.key} className="px-3 sm:px-6 py-4 text-sm text-gray-900">
                     {column.render
                       ? column.render(item)
                       : String((item as any)[column.key] || '-')}
                   </td>
                 ))}
                 {actions && (
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     {actions(item)}
                   </td>
                 )}
