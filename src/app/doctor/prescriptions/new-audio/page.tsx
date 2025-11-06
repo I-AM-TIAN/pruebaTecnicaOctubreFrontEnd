@@ -224,7 +224,7 @@ export default function NewAudioPrescriptionPage() {
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
             <li>Habla claro y despacio</li>
             <li>Menciona: nombre del medicamento, dosis, cantidad e instrucciones</li>
-            <li>Ejemplo: "Ibuprofeno 400 miligramos, 20 tabletas, tomar una cada 8 horas"</li>
+            <li>Ejemplo: &ldquo;Ibuprofeno 400 miligramos, 20 tabletas, tomar una cada 8 horas&rdquo;</li>
             <li>Graba en un lugar silencioso</li>
             <li>Duración recomendada: 10-60 segundos</li>
           </ul>

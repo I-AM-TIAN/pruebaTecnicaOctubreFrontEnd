@@ -20,10 +20,6 @@ export default function NewPrescriptionPage() {
     { name: '', dosage: '', quantity: 1, instructions: '' },
   ]);
 
-  useEffect(() => {
-    loadPatients();
-  }, []);
-
   const loadPatients = async () => {
     try {
       setLoadingPatients(true);
@@ -36,6 +32,11 @@ export default function NewPrescriptionPage() {
       setLoadingPatients(false);
     }
   };
+
+  useEffect(() => {
+    loadPatients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const addItem = () => {
     setItems([...items, { name: '', dosage: '', quantity: 1, instructions: '' }]);

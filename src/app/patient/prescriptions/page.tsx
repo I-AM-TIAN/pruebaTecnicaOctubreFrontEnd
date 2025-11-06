@@ -32,10 +32,6 @@ export default function PatientPrescriptionsPage() {
     page: parseInt(searchParams.get('page') || '1'),
   });
 
-  useEffect(() => {
-    loadPrescriptions();
-  }, [filters]);
-
   const loadPrescriptions = async () => {
     try {
       setIsLoading(true);
@@ -60,6 +56,11 @@ export default function PatientPrescriptionsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadPrescriptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const updateFilters = (newFilters: Partial<typeof filters>) => {
     const updated = { ...filters, ...newFilters, page: 1 };

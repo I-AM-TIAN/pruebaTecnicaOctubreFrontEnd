@@ -30,12 +30,6 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
     });
   }, [params]);
 
-  useEffect(() => {
-    if (prescriptionId) {
-      loadPrescription();
-    }
-  }, [prescriptionId]);
-
   const loadPrescription = async () => {
     if (!prescriptionId) return;
 
@@ -51,6 +45,13 @@ export default function PatientPrescriptionDetailPage({ params }: PageProps) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (prescriptionId) {
+      loadPrescription();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prescriptionId]);
 
   const handleConsume = async () => {
     if (!prescription) return;
