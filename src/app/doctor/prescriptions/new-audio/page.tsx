@@ -31,16 +31,6 @@ export default function NewAudioPrescriptionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    loadPatients();
-  }, []);
-
-  useEffect(() => {
-    if (recorderError) {
-      toast.error(recorderError);
-    }
-  }, [recorderError, toast]);
-
   const loadPatients = async () => {
     try {
       setLoadingPatients(true);
@@ -60,6 +50,17 @@ export default function NewAudioPrescriptionPage() {
       setLoadingPatients(false);
     }
   };
+
+  useEffect(() => {
+    loadPatients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (recorderError) {
+      toast.error(recorderError);
+    }
+  }, [recorderError, toast]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
